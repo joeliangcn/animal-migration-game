@@ -1,21 +1,21 @@
 <!--
-Animal Migration Game – Single-page web app (v2)
-✓ Drag to path (mouse & touch)
-✓ Audio cues
-✓ Simple animations
-✓ Star scoring
-✓ Mobile-friendly big hit areas
-✓ localStorage progress save
+动物迁徙游戏 – 单页面网页应用 (中文版)
+✓ 拖拽到路径 (鼠标和触摸)
+✓ 音频提示
+✓ 简单动画
+✓ 星级评分
+✓ 移动端友好的大触摸区域
+✓ localStorage进度保存
 
-Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cloudflare Pages.
+部署: 保存为index-zh.html + /assets文件夹 (地图和动物PNG) → 上传到Cloudflare Pages。
 -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Animal Migration Game</title>
+  <title>动物迁徙游戏</title>
   <style>
     :root {
       --bg: #f5f9ff;
@@ -33,7 +33,8 @@ Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cl
       height: 100%;
       background: var(--bg);
       color: var(--text);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "WenQuanYi Micro Hei", sans-serif;
+      font-size: 14px;
     }
 
     header {
@@ -50,7 +51,7 @@ Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cl
     }
 
     header h1 {
-      font-size: 1.05rem;
+      font-size: 1rem;
       margin: 0 1rem 0 0;
     }
 
@@ -198,15 +199,6 @@ Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cl
       height: 100%;
     }
 
-    svg#line-layer {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-    }
-
     .dropzone {
       position: absolute;
       border: 2px dashed rgba(255, 255, 255, 0.4);
@@ -320,7 +312,7 @@ Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cl
     }
 
     #win-screen h2 {
-      font-size: 2rem;
+      font-size: 1.8rem;
       margin: 0 0 1rem 0;
     }
 
@@ -412,83 +404,6 @@ Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cl
       }
     }
 
-    /* Scrollbar styling for better UX */
-    #map-area::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-
-    #map-area::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.1);
-      border-radius: 4px;
-    }
-
-    #map-area::-webkit-scrollbar-thumb {
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 4px;
-    }
-
-    #map-area::-webkit-scrollbar-thumb:hover {
-      background: rgba(0, 0, 0, 0.5);
-    }
-
-    /* Scroll hint for mobile devices */
-    .scroll-hint {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: rgba(0, 0, 0, 0.7);
-      color: white;
-      padding: 0.3rem 0.6rem;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      z-index: 100;
-      animation: fadeInOut 3s ease-in-out;
-    }
-
-    @keyframes fadeInOut {
-
-      0%,
-      100% {
-        opacity: 0;
-      }
-
-      50% {
-        opacity: 1;
-      }
-    }
-
-    @media(max-width:800px) {
-      main {
-        flex-direction: column;
-      }
-
-      #sidebar {
-        width: 100%;
-        height: 200px;
-        order: 2;
-      }
-
-      #map-area {
-        order: 1;
-        height: calc(100% - 200px);
-      }
-
-      .dropzone {
-        border-radius: 16px;
-      }
-
-      .scroll-hint {
-        display: block;
-      }
-    }
-
-    @media(min-width:801px) {
-      .scroll-hint {
-        display: none;
-      }
-    }
-
     /* Loading Screen Styles */
     #loading-screen {
       position: fixed;
@@ -503,7 +418,7 @@ Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cl
     }
 
     .loading-title {
-      font-size: 3rem;
+      font-size: 2.5rem;
       font-weight: bold;
       margin-bottom: 2rem;
       text-align: center;
@@ -623,13 +538,83 @@ Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cl
       background: #f0f0f0;
       color: #333;
     }
+
+    /* Scrollbar styling for better UX */
+    #map-area::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    #map-area::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.1);
+      border-radius: 4px;
+    }
+
+    #map-area::-webkit-scrollbar-thumb {
+      background: rgba(0,0,0,0.3);
+      border-radius: 4px;
+    }
+
+    #map-area::-webkit-scrollbar-thumb:hover {
+      background: rgba(0,0,0,0.5);
+    }
+
+    /* Scroll hint for mobile devices */
+    .scroll-hint {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      z-index: 100;
+      animation: fadeInOut 3s ease-in-out;
+    }
+
+    @keyframes fadeInOut {
+      0%, 100% { opacity: 0; }
+      50% { opacity: 1; }
+    }
+
+    @media(max-width:800px) {
+      main {
+        flex-direction: column;
+      }
+
+      #sidebar {
+        width: 100%;
+        height: 200px;
+        order: 2;
+      }
+
+      #map-area {
+        order: 1;
+        height: calc(100% - 200px);
+      }
+
+      .dropzone {
+        border-radius: 16px;
+      }
+
+      .scroll-hint {
+        display: block;
+      }
+    }
+
+    @media(min-width:801px) {
+      .scroll-hint {
+        display: none;
+      }
+    }
   </style>
 </head>
 
 <body>
   <!-- Loading Screen -->
   <div id="loading-screen">
-    <div class="loading-title">Animal Migration Game</div>
+    <div class="loading-title">动物迁徙游戏</div>
     <div class="bird-animation">
       <div class="flying-animal">🦋</div>
       <div class="flying-animal">🐋</div>
@@ -638,27 +623,28 @@ Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cl
       <div class="flying-animal">🐦</div>
       <div class="flying-animal">🦌</div>
     </div>
-    <div class="loading-text">Loading amazing migrations...</div>
+    <div class="loading-text">正在加载神奇的迁徙之旅...</div>
   </div>
+
   <header>
-    <h1>Animal Migration Game</h1>
-    <a href="index-zh.html" class="language-switch">中文</a>
-    <button id="startBtn">Start</button>
-    <button id="resetBtn" class="secondary">Reset</button>
+    <h1>动物迁徙游戏</h1>
+    <a href="index.html" class="language-switch">English</a>
+    <button id="startBtn">开始</button>
+    <button id="resetBtn" class="secondary">重置</button>
     <div id="scoreboard">0 / 0</div>
-    <div id="stars" aria-label="score stars"></div>
+    <div id="stars" aria-label="得分星级"></div>
   </header>
 
   <main>
     <aside id="sidebar">
-      <h2>Drag the Animal to its Route</h2>
+      <h2>将动物拖拽到它们的迁徙路线</h2>
       <div id="animalList"></div>
     </aside>
 
     <section id="map-area">
-      <div class="scroll-hint">Scroll to explore the map</div>
+      <div class="scroll-hint">滑动探索地图</div>
       <div class="map-container">
-        <img id="world-map" src="assets/World-Continents-Topographic-map-optimized.jpg" alt="World Map" />
+        <img id="world-map" src="assets/World-Continents-Topographic-map-optimized.jpg" alt="世界地图" />
 
         <!-- Migration routes removed - using background image instead -->
 
@@ -685,9 +671,9 @@ Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cl
   <div id="win-screen">
     <div class="celebration-container">
       <div class="thumb-icon">👍</div>
-      <h2>Great job!</h2>
+      <h2>太棒了！</h2>
       <p id="win-stars">⭐⭐⭐</p>
-      <button id="playAgain">Play Again</button>
+      <button id="playAgain">再玩一次</button>
     </div>
     <div class="confetti-container"></div>
   </div>
@@ -695,65 +681,66 @@ Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cl
   <script>
     const animals = [
       {
-        id: "monarch", name: "Monarch Butterfly", img: "assets/monarch.webp", route: "monarch",
-        distance_km: 4800, months: "Aug–Nov southbound, Mar–Jun northbound",
-        from: "Canada / USA", to: "Mexico", time_days: "~2 months",
-        funfact: "Only butterfly known for a two‑way long migration."
+        id: "monarch", name: "帝王蝶", img: "assets/monarch.webp", route: "monarch",
+        distance_km: 4800, months: "8-11月南迁，3-6月北迁",
+        from: "加拿大/美国", to: "墨西哥", time_days: "约2个月",
+        funfact: "唯一已知进行双向长距离迁徙的蝴蝶。"
       },
       {
-        id: "greywhale", name: "Grey Whale", img: "assets/greywhale.webp", route: "greywhale",
-        distance_km: 20000, months: "Oct–Feb southbound, Mar–Jul northbound",
-        from: "Alaska", to: "Baja California", time_days: "2–3 months each way",
-        funfact: "Makes one of the longest migrations of any mammal!"
+        id: "greywhale", name: "灰鲸", img: "assets/greywhale.webp", route: "greywhale",
+        distance_km: 20000, months: "10-2月南迁，3-7月北迁",
+        from: "阿拉斯加", to: "下加利福尼亚", time_days: "单程2-3个月",
+        funfact: "哺乳动物中迁徙距离最长的物种之一！"
       },
       {
-        id: "loggerheadturtle", name: "Loggerhead Turtle", img: "assets/loggerheadtTurtle.webp", route: "loggerheadturtle",
-        distance_km: 12000, months: "Varies by species",
-        from: "Open ocean", to: "Nesting beaches", time_days: "Years across life cycle",
-        funfact: "They sense Earth’s magnetic field to navigate."
+        id: "loggerheadturtle", name: "蠵龟", img: "assets/loggerheadtTurtle.webp", route: "loggerheadturtle",
+        distance_km: 12000, months: "因物种而异",
+        from: "开阔海洋", to: "筑巢海滩", time_days: "生命周期中数年",
+        funfact: "它们能感知地球磁场来导航。"
       },
       {
-        id: "salmon", name: "Salmon", img: "assets/salmon.webp", route: "salmon",
-        distance_km: 1600, months: "Varies by species",
-        from: "Ocean", to: "Home rivers to spawn", time_days: "Weeks–months",
-        funfact: "They return to the exact stream where they were born."
+        id: "salmon", name: "鲑鱼", img: "assets/salmon.webp", route: "salmon",
+        distance_km: 1600, months: "因物种而异",
+        from: "海洋", to: "出生河流产卵", time_days: "数周至数月",
+        funfact: "它们会回到出生的确切河流。"
       },
       {
-        id: "swallow", name: "Swallow", img: "assets/swallow.webp", route: "swallow",
-        distance_km: 10000, months: "Sep–Apr (Europe to Africa)",
-        from: "Europe", to: "Southern Africa", time_days: "1–2 months",
-        funfact: "Can fly ~300 km in a day."
+        id: "swallow", name: "燕子", img: "assets/swallow.webp", route: "swallow",
+        distance_km: 10000, months: "9-4月（欧洲到非洲）",
+        from: "欧洲", to: "南非", time_days: "1-2个月",
+        funfact: "一天能飞行约300公里。"
       },
       {
-        id: "wildebeest", name: "Wildebeest", img: "assets/wildebeest.webp", route: "wildebeest",
-        distance_km: 800, months: "Year‑round circular route",
-        from: "Serengeti (Tanzania)", to: "Maasai Mara (Kenya) & back", time_days: "Continuous annual loop",
-        funfact: "~1.5 million take part in this migration!"
+        id: "wildebeest", name: "角马", img: "assets/wildebeest.webp", route: "wildebeest",
+        distance_km: 800, months: "全年循环路线",
+        from: "塞伦盖蒂（坦桑尼亚）", to: "马赛马拉（肯尼亚）往返", time_days: "持续的年度循环",
+        funfact: "约150万只角马参与这次迁徙！"
       },
       {
-        id: "orientalstork", name: "Oriental Stork", img: "assets/orientalstork.webp", route: "orientalstork",
-        distance_km: 3000, months: "Spring and autumn migration",
-        from: "Northeast China", to: "Yangtze River valley", time_days: "Several weeks",
-        funfact: "Follows rivers and wetlands during migration."
+        id: "orientalstork", name: "东方白鹳", img: "assets/orientalstork.webp", route: "orientalstork",
+        distance_km: 3000, months: "春秋两季迁徙",
+        from: "中国东北", to: "长江流域", time_days: "数周",
+        funfact: "迁徙时沿着河流和湿地飞行。"
       },
       {
-        id: "japaneseeel", name: "Japanese Eel", img: "assets/glasseel.webp", route: "japaneseeel",
-        distance_km: 2000, months: "Adult spawning migration",
-        from: "Japanese rivers", to: "Mariana Trench", time_days: "Several months",
-        funfact: "Lives in freshwater but spawns in deep ocean."
+        id: "japaneseeel", name: "日本鳗鱼", img: "assets/glasseel.webp", route: "japaneseeel",
+        distance_km: 2000, months: "成鱼产卵迁徙",
+        from: "日本河流", to: "马里亚纳海沟", time_days: "数月",
+        funfact: "在淡水中生活但在深海产卵。"
       },
       {
-        id: "arctictern", name: "Arctic Tern", img: "assets/arctictern.webp", route: "arctictern",
-        distance_km: 70000, months: "Annual round-trip migration",
-        from: "Arctic", to: "Antarctic", time_days: "Several months each way",
-        funfact: "Makes the longest migration of any bird - from Arctic to Antarctic!"
+        id: "arctictern", name: "北极燕鸥", img: "assets/arctictern.webp", route: "arctictern",
+        distance_km: 70000, months: "年度往返迁徙",
+        from: "北极", to: "南极", time_days: "单程数月",
+        funfact: "鸟类中迁徙距离最长的——从北极到南极！"
       }
     ];
 
     let placed = 0;
     let mistakes = 0;
-    const STORAGE_KEY = 'migrationGameProgress_v2';
+    const STORAGE_KEY = 'migrationGameProgress_v2_zh';
     let draggingCard = null;
+    let autoCloseTimer = null;
 
     document.addEventListener('DOMContentLoaded', () => {
       // Hide loading screen after 5 seconds to show full animation
@@ -779,11 +766,15 @@ Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cl
         }
         document.getElementById('info-dialog').close();
       });
-      document.getElementById('playAgain').addEventListener('click', () => { fullReset(); document.getElementById('win-screen').style.display = 'none'; });
+      document.getElementById('playAgain').addEventListener('click', () => {
+        fullReset();
+        document.getElementById('win-screen').style.display = 'none';
+      });
     }
 
     function renderAnimals() {
-      document.getElementById('animalList').innerHTML = '';
+      const animalList = document.getElementById('animalList');
+      animalList.innerHTML = '';
       animals.forEach(a => {
         if (isPlaced(a.id)) return;
         const card = document.createElement('div');
@@ -792,7 +783,7 @@ Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cl
         card.id = 'card-' + a.id;
         card.dataset.animalId = a.id;
         card.innerHTML = `<img src="${a.img}" alt="${a.name}"><span>${a.name}</span>`;
-        document.getElementById('animalList').appendChild(card);
+        animalList.appendChild(card);
       });
     }
 
@@ -809,7 +800,10 @@ Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cl
       });
 
       document.querySelectorAll('.dropzone').forEach(zone => {
-        zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('highlight'); });
+        zone.addEventListener('dragover', e => {
+          e.preventDefault();
+          zone.classList.add('highlight');
+        });
         zone.addEventListener('dragleave', () => zone.classList.remove('highlight'));
         zone.addEventListener('drop', onDrop);
 
@@ -832,10 +826,12 @@ Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cl
       draggingCard = e.currentTarget;
       draggingCard.classList.add('dragging');
     }
+
     function touchMove(e) {
       if (!draggingCard) return;
       e.preventDefault();
     }
+
     function touchEnd(e) {
       if (!draggingCard) return;
       const touch = e.changedTouches[0];
@@ -911,6 +907,7 @@ Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cl
       document.getElementById('scoreboard').textContent = `${placed} / ${animals.length}`;
       updateStarsDisplay();
     }
+
     function calcStars() {
       if (mistakes === 0) return 8;
       if (mistakes <= 1) return 7;
@@ -921,11 +918,13 @@ Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cl
       if (mistakes <= 8) return 2;
       return 1;
     }
+
     function updateStarsDisplay() {
       // Show stars based on correct answers (placed), not mistakes
       const earnedStars = Math.min(placed, 8); // Maximum 8 stars
       document.getElementById('stars').textContent = '★'.repeat(earnedStars) + '☆'.repeat(8 - earnedStars);
     }
+
     function endGame() {
       playSound('win');
       document.getElementById('win-stars').textContent = '⭐⭐⭐';
@@ -967,17 +966,15 @@ Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cl
       }, 5000);
     }
 
-    let autoCloseTimer = null;
-
     function showInfo(animal, zone) {
       const dialog = document.getElementById('info-dialog');
       document.getElementById('info-name').textContent = animal.name;
       document.getElementById('info-text').innerHTML = `
-    <strong>Distance:</strong> ${animal.distance_km.toLocaleString()} km<br>
-    <strong>Time:</strong> ${animal.time_days}<br>
-    <strong>From:</strong> ${animal.from}<br>
-    <strong>To:</strong> ${animal.to}<br>
-    <strong>When:</strong> ${animal.months}<br>
+    <strong>距离:</strong> ${animal.distance_km.toLocaleString()} 公里<br>
+    <strong>时间:</strong> ${animal.time_days}<br>
+    <strong>从:</strong> ${animal.from}<br>
+    <strong>到:</strong> ${animal.to}<br>
+    <strong>时期:</strong> ${animal.months}<br>
     <em>${animal.funfact}</em>
   `;
 
@@ -1035,18 +1032,30 @@ Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cl
       if (!d.placed.includes(id)) d.placed.push(id);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
     }
+
     function saveMistakes() {
       const d = loadStorage();
       d.mistakes = mistakes;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
     }
+
     function isPlaced(id) {
       return loadStorage().placed.includes(id);
     }
+
     function loadStorage() {
-      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { placed: [], mistakes: 0 }; }
-      catch (e) { return { placed: [], mistakes: 0 }; }
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { placed: [], mistakes: 0 };
+      }
+      catch (e) {
+        return { placed: [], mistakes: 0 };
+      }
     }
+
+    function clearStorage() {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+
     function restoreProgress() {
       const d = loadStorage();
       placed = d.placed.length;
@@ -1057,7 +1066,6 @@ Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cl
         if (a && d.placed.includes(a.id)) z.classList.add('correct');
       });
     }
-    function clearStorage() { localStorage.removeItem(STORAGE_KEY); }
 
     function startGame() {
       const list = document.getElementById('animalList');
@@ -1067,8 +1075,10 @@ Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cl
         list.appendChild(cards[j]);
       }
     }
+
     function fullReset() {
-      placed = 0; mistakes = 0;
+      placed = 0;
+      mistakes = 0;
       clearStorage();
       renderAnimals();
       setupDnD();
@@ -1084,6 +1094,7 @@ Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cl
 
     // audio
     let audioCtx = null;
+
     function playSound(type) {
       try {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1091,8 +1102,10 @@ Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cl
           const notes = [660, 880, 1046];
           notes.forEach((f, i) => {
             const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-            o.type = 'sine'; o.frequency.value = f;
-            o.connect(g); g.connect(audioCtx.destination);
+            o.type = 'sine';
+            o.frequency.value = f;
+            o.connect(g);
+            g.connect(audioCtx.destination);
             g.gain.setValueAtTime(0.0001, audioCtx.currentTime + i * 0.18);
             g.gain.exponentialRampToValueAtTime(0.3, audioCtx.currentTime + i * 0.18 + 0.05);
             g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + i * 0.18 + 0.17);
@@ -1102,15 +1115,24 @@ Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cl
           return;
         }
         const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-        o.connect(g); g.connect(audioCtx.destination);
+        o.connect(g);
+        g.connect(audioCtx.destination);
         let freq = 440, dur = .25;
-        if (type === 'correct') { freq = 880; dur = .22; }
-        if (type === 'wrong') { freq = 220; dur = .35; }
-        o.type = 'sine'; o.frequency.value = freq;
+        if (type === 'correct') {
+          freq = 880;
+          dur = .22;
+        }
+        if (type === 'wrong') {
+          freq = 220;
+          dur = .35;
+        }
+        o.type = 'sine';
+        o.frequency.value = freq;
         g.gain.setValueAtTime(0.0001, audioCtx.currentTime);
         g.gain.exponentialRampToValueAtTime(0.4, audioCtx.currentTime + .02);
         g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
-        o.start(); o.stop(audioCtx.currentTime + dur + .05);
+        o.start();
+        o.stop(audioCtx.currentTime + dur + .05);
       } catch (e) { }
     }
   </script>
