@@ -1,0 +1,1024 @@
+<!--
+Animal Migration Game – Single-page web app (v2)
+✓ Drag to path (mouse & touch)
+✓ Audio cues
+✓ Simple animations
+✓ Star scoring
+✓ Mobile-friendly big hit areas
+✓ localStorage progress save
+
+Deploy: save as index.html + /assets folder (map & animal PNGs) → upload to Cloudflare Pages.
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Animal Migration Game</title>
+  <style>
+    :root {
+      --bg: #f5f9ff;
+      --panel: #fff;
+      --accent: #0077ff;
+      --correct: #34a853;
+      --wrong: #ea4335;
+      --text: #1d1d1f;
+      --shadow: 0 4px 14px rgba(0, 0, 0, .12);
+    }
+
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    header {
+      padding: .8rem 1rem;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      flex-wrap: wrap
+    }
+
+    header h1 {
+      font-size: 1.05rem;
+      margin: 0 1rem 0 0;
+    }
+
+    header button {
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      padding: .45rem .9rem;
+      border-radius: .4rem;
+      cursor: pointer;
+      font-size: .9rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
+      transition: all .2s ease;
+    }
+
+    header button:hover {
+      background: #0066dd;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, .3);
+      transform: translateY(-1px);
+    }
+
+    header button:active {
+      background: #0055bb;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
+      transform: translateY(0);
+    }
+
+    header button.secondary {
+      background: #ddd;
+      color: #333;
+    }
+
+    header button.secondary:hover {
+      background: #bbb;
+      color: #222;
+    }
+
+    header button.secondary:active {
+      background: #999;
+      color: #111;
+    }
+
+    #scoreboard {
+      margin-left: auto;
+      font-weight: 600;
+    }
+
+    #stars {
+      margin-left: .6rem;
+      font-size: 1.2rem;
+    }
+
+    main {
+      display: flex;
+      height: calc(100% - 64px);
+    }
+
+    #sidebar {
+      width: 240px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    #sidebar h2 {
+      margin-top: 0;
+      font-size: 1rem;
+      border-bottom: 1px solid #eee;
+      padding-bottom: .4rem;
+    }
+
+    .animal-card {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: .5rem;
+      padding: .45rem;
+      margin-bottom: .55rem;
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+      transition: transform .15s;
+    }
+
+    .animal-card img {
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
+    }
+
+    .animal-card.dragging {
+      opacity: .5;
+      transform: scale(.95);
+    }
+
+    #map-area {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      background: #cfe8ff;
+      touch-action: none;
+    }
+
+    #world-map {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    svg#line-layer {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .dropzone {
+      position: absolute;
+      border: 2px dashed rgba(255, 255, 255, 0.4);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(2px);
+      transition: all .3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .dropzone.highlight {
+      border-color: var(--accent);
+      background: rgba(0, 119, 255, 0.2);
+      box-shadow: 0 4px 16px rgba(0, 119, 255, 0.3);
+      transform: scale(1.05);
+    }
+
+    .dropzone.correct {
+      border-color: var(--correct);
+      background: rgba(52, 168, 83, 0.3);
+      animation: pulse .6s ease;
+      box-shadow: 0 4px 16px rgba(52, 168, 83, 0.4);
+    }
+
+    .animal-icon {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      border: 4px solid var(--correct);
+      animation: iconAppear 0.5s ease-out;
+    }
+
+    .animal-icon img {
+      width: 75px;
+      height: 75px;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    @keyframes iconAppear {
+      0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+      }
+
+      50% {
+        transform: translate(-50%, -50%) scale(1.2);
+      }
+
+      70% {
+        transform: translate(-50%, -50%) scale(1) rotate(-5deg);
+      }
+
+      80% {
+        transform: translate(-50%, -50%) scale(1) rotate(5deg);
+      }
+
+      90% {
+        transform: translate(-50%, -50%) scale(1) rotate(-3deg);
+      }
+
+      100% {
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+        opacity: 1;
+      }
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(52, 168, 83, .6);
+      }
+
+      100% {
+        box-shadow: 0 0 0 18px rgba(52, 168, 83, 0);
+      }
+    }
+
+    #info-dialog {
+      border: none;
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      max-width: 420px;
+      box-shadow: var(--shadow);
+    }
+
+    #info-dialog::backdrop {
+      background: rgba(0, 0, 0, .35);
+    }
+
+    #info-dialog h3 {
+      margin-top: 0;
+    }
+
+    #win-screen {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .65);
+      color: #fff;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 999;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    #win-screen h2 {
+      font-size: 2rem;
+      margin: 0 0 1rem 0;
+    }
+
+    #win-screen button {
+      background: #fff;
+      color: #000;
+      padding: .6rem 1.2rem;
+      border-radius: .4rem;
+      border: none;
+      cursor: pointer;
+    }
+
+    .celebration-container {
+      position: relative;
+      z-index: 10;
+    }
+
+    .thumb-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      animation: thumbBounce 1s ease-in-out infinite alternate;
+    }
+
+    @keyframes thumbBounce {
+      0% {
+        transform: translateY(0) scale(1);
+      }
+
+      100% {
+        transform: translateY(-10px) scale(1.1);
+      }
+    }
+
+    .confetti-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #ff6b6b;
+      animation: confettiFall 3s linear infinite;
+    }
+
+    .confetti:nth-child(2n) {
+      background: #4ecdc4;
+    }
+
+    .confetti:nth-child(3n) {
+      background: #45b7d1;
+    }
+
+    .confetti:nth-child(4n) {
+      background: #f9ca24;
+    }
+
+    .confetti:nth-child(5n) {
+      background: #6c5ce7;
+    }
+
+    .confetti:nth-child(6n) {
+      background: #a29bfe;
+    }
+
+    .confetti:nth-child(7n) {
+      background: #fd79a8;
+    }
+
+    .confetti:nth-child(8n) {
+      background: #00b894;
+    }
+
+    @keyframes confettiFall {
+      0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    @media(max-width:800px) {
+      main {
+        flex-direction: column;
+      }
+
+      #sidebar {
+        width: 100%;
+        height: 200px;
+        order: 2;
+      }
+
+      #map-area {
+        order: 1;
+        height: calc(100% - 200px);
+      }
+
+      .dropzone {
+        border-radius: 16px;
+      }
+    }
+
+    /* Loading Screen Styles */
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 1000;
+      color: white;
+    }
+
+    .loading-title {
+      font-size: 3rem;
+      font-weight: bold;
+      margin-bottom: 2rem;
+      text-align: center;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .bird-animation {
+      position: relative;
+      width: 100%;
+      height: 120px;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+
+    .flying-animal {
+      position: absolute;
+      font-size: 2.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    /* Left side animals - fly to the left */
+    .flying-animal:nth-child(1) {
+      left: 25%;
+      animation: flyLeft 6.75s ease-in-out infinite;
+      animation-delay: 0s;
+    }
+
+    .flying-animal:nth-child(2) {
+      left: 35%;
+      animation: flyLeft 6.75s ease-in-out infinite;
+      animation-delay: 0s;
+    }
+
+    .flying-animal:nth-child(3) {
+      left: 45%;
+      animation: flyLeft 6.75s ease-in-out infinite;
+      animation-delay: 0s;
+    }
+
+    /* Right side animals - fly to the right */
+    .flying-animal:nth-child(4) {
+      left: 55%;
+      animation: flyRight 6.75s ease-in-out infinite;
+      animation-delay: 0s;
+    }
+
+    .flying-animal:nth-child(5) {
+      left: 65%;
+      animation: flyRight 6.75s ease-in-out infinite;
+      animation-delay: 0s;
+    }
+
+    .flying-animal:nth-child(6) {
+      left: 75%;
+      animation: flyRight 6.75s ease-in-out infinite;
+      animation-delay: 0s;
+    }
+
+    @keyframes flyLeft {
+      0% {
+        transform: translateY(-50%) translateX(0) rotate(0deg);
+        opacity: 1;
+      }
+
+      50% {
+        transform: translateY(-60%) translateX(-200px) rotate(-15deg);
+      }
+
+      100% {
+        transform: translateY(-50%) translateX(-400px) rotate(-30deg);
+        opacity: 0;
+      }
+    }
+
+    @keyframes flyRight {
+      0% {
+        transform: translateY(-50%) translateX(0) rotate(0deg);
+        opacity: 1;
+      }
+
+      50% {
+        transform: translateY(-60%) translateX(200px) rotate(15deg);
+      }
+
+      100% {
+        transform: translateY(-50%) translateX(400px) rotate(30deg);
+        opacity: 0;
+      }
+    }
+
+    .loading-text {
+      font-size: 1.2rem;
+      opacity: 0.8;
+    }
+
+    /* Close button styles */
+    #closeInfo {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #666;
+      padding: 5px;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #closeInfo:hover {
+      background: #f0f0f0;
+      color: #333;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <div class="loading-title">Animal Migration Game</div>
+    <div class="bird-animation">
+      <div class="flying-animal">🦋</div>
+      <div class="flying-animal">🐋</div>
+      <div class="flying-animal">🐢</div>
+      <div class="flying-animal">🐟</div>
+      <div class="flying-animal">🐦</div>
+      <div class="flying-animal">🦌</div>
+    </div>
+    <div class="loading-text">Loading amazing migrations...</div>
+  </div>
+  <header>
+    <h1>Animal Migration Game</h1>
+    <button id="startBtn">Start</button>
+    <button id="resetBtn" class="secondary">Reset</button>
+    <div id="scoreboard">0 / 0</div>
+    <div id="stars" aria-label="score stars"></div>
+  </header>
+
+  <main>
+    <aside id="sidebar">
+      <h2>Drag the Animal to its Route</h2>
+      <div id="animalList"></div>
+    </aside>
+
+    <section id="map-area">
+      <img id="world-map" src="assets/World-Continents-Topographic-map-optimized.jpg" alt="World Map" />
+
+      <!-- Migration routes removed - using background image instead -->
+
+      <!-- Drop zones: positioned at route endpoints based on reference map -->
+      <div class="dropzone" data-route="monarch" style="left:25%; top:15%; width:10%; height:10%;"></div>
+      <div class="dropzone" data-route="greywhale" style="left:10%; top:15%; width:10%; height:10%;"></div>
+      <div class="dropzone" data-route="loggerheadturtle" style="left:36%; top:38%; width:10%; height:10%;"></div>
+      <div class="dropzone" data-route="salmon" style="left:50%; top:8%; width:10%; height:10%;"></div>
+      <div class="dropzone" data-route="swallow" style="left:50%; top:49%; width:10%; height:10%;"></div>
+      <div class="dropzone" data-route="wildebeest" style="left:60%; top:74%; width:10%; height:10%;"></div>
+      <div class="dropzone" data-route="orientalstork" style="left:77%; top:9%; width:10%; height:10%;"></div>
+      <div class="dropzone" data-route="japaneseeel" style="left:85%; top:45%; width:10%; height:10%;"></div>
+      <div class="dropzone" data-route="arctictern" style="left:15%; top:70%; width:10%; height:10%;"></div>
+    </section>
+  </main>
+
+  <dialog id="info-dialog">
+    <h3 id="info-name"></h3>
+    <p id="info-text"></p>
+    <button id="closeInfo">✕</button>
+  </dialog>
+
+  <div id="win-screen">
+    <div class="celebration-container">
+      <div class="thumb-icon">👍</div>
+      <h2>Great job!</h2>
+      <p id="win-stars">⭐⭐⭐</p>
+      <button id="playAgain">Play Again</button>
+    </div>
+    <div class="confetti-container"></div>
+  </div>
+
+  <script>
+    const animals = [
+      {
+        id: "monarch", name: "Monarch Butterfly", img: "assets/monarch.webp", route: "monarch",
+        distance_km: 4800, months: "Aug–Nov southbound, Mar–Jun northbound",
+        from: "Canada / USA", to: "Mexico", time_days: "~2 months",
+        funfact: "Only butterfly known for a two‑way long migration."
+      },
+      {
+        id: "greywhale", name: "Grey Whale", img: "assets/greywhale.webp", route: "greywhale",
+        distance_km: 20000, months: "Oct–Feb southbound, Mar–Jul northbound",
+        from: "Alaska", to: "Baja California", time_days: "2–3 months each way",
+        funfact: "Makes one of the longest migrations of any mammal!"
+      },
+      {
+        id: "loggerheadturtle", name: "Loggerhead Turtle", img: "assets/loggerheadtTurtle.webp", route: "loggerheadturtle",
+        distance_km: 12000, months: "Varies by species",
+        from: "Open ocean", to: "Nesting beaches", time_days: "Years across life cycle",
+        funfact: "They sense Earth’s magnetic field to navigate."
+      },
+      {
+        id: "salmon", name: "Salmon", img: "assets/salmon.webp", route: "salmon",
+        distance_km: 1600, months: "Varies by species",
+        from: "Ocean", to: "Home rivers to spawn", time_days: "Weeks–months",
+        funfact: "They return to the exact stream where they were born."
+      },
+      {
+        id: "swallow", name: "Swallow", img: "assets/swallow.webp", route: "swallow",
+        distance_km: 10000, months: "Sep–Apr (Europe to Africa)",
+        from: "Europe", to: "Southern Africa", time_days: "1–2 months",
+        funfact: "Can fly ~300 km in a day."
+      },
+      {
+        id: "wildebeest", name: "Wildebeest", img: "assets/wildebeest.webp", route: "wildebeest",
+        distance_km: 800, months: "Year‑round circular route",
+        from: "Serengeti (Tanzania)", to: "Maasai Mara (Kenya) & back", time_days: "Continuous annual loop",
+        funfact: "~1.5 million take part in this migration!"
+      },
+      {
+        id: "orientalstork", name: "Oriental Stork", img: "assets/orientalstork.webp", route: "orientalstork",
+        distance_km: 3000, months: "Spring and autumn migration",
+        from: "Northeast China", to: "Yangtze River valley", time_days: "Several weeks",
+        funfact: "Follows rivers and wetlands during migration."
+      },
+      {
+        id: "japaneseeel", name: "Japanese Eel", img: "assets/glasseel.webp", route: "japaneseeel",
+        distance_km: 2000, months: "Adult spawning migration",
+        from: "Japanese rivers", to: "Mariana Trench", time_days: "Several months",
+        funfact: "Lives in freshwater but spawns in deep ocean."
+      },
+      {
+        id: "arctictern", name: "Arctic Tern", img: "assets/arctictern.webp", route: "arctictern",
+        distance_km: 70000, months: "Annual round-trip migration",
+        from: "Arctic", to: "Antarctic", time_days: "Several months each way",
+        funfact: "Makes the longest migration of any bird - from Arctic to Antarctic!"
+      }
+    ];
+
+    let placed = 0;
+    let mistakes = 0;
+    const STORAGE_KEY = 'migrationGameProgress_v2';
+    let draggingCard = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Hide loading screen after 5 seconds to show full animation
+      setTimeout(() => {
+        document.getElementById('loading-screen').style.display = 'none';
+      }, 5000);
+
+      renderAnimals();
+      restoreProgress();
+      setupDnD();
+      initButtons();
+      updateScore();
+      updateStarsDisplay();
+    });
+
+    function initButtons() {
+      document.getElementById('startBtn').addEventListener('click', startGame);
+      document.getElementById('resetBtn').addEventListener('click', fullReset);
+      document.getElementById('closeInfo').addEventListener('click', () => {
+        if (autoCloseTimer) {
+          clearTimeout(autoCloseTimer);
+          autoCloseTimer = null;
+        }
+        document.getElementById('info-dialog').close();
+      });
+      document.getElementById('playAgain').addEventListener('click', () => { fullReset(); document.getElementById('win-screen').style.display = 'none'; });
+    }
+
+    function renderAnimals() {
+      document.getElementById('animalList').innerHTML = '';
+      animals.forEach(a => {
+        if (isPlaced(a.id)) return;
+        const card = document.createElement('div');
+        card.className = 'animal-card';
+        card.draggable = true;
+        card.id = 'card-' + a.id;
+        card.dataset.animalId = a.id;
+        card.innerHTML = `<img src="${a.img}" alt="${a.name}"><span>${a.name}</span>`;
+        document.getElementById('animalList').appendChild(card);
+      });
+    }
+
+    function setupDnD() {
+      document.querySelectorAll('.animal-card').forEach(card => {
+        card.addEventListener('dragstart', e => {
+          e.dataTransfer.setData('text/plain', card.dataset.animalId);
+          card.classList.add('dragging');
+        });
+        card.addEventListener('dragend', () => card.classList.remove('dragging'));
+
+        // touch
+        card.addEventListener('touchstart', touchStart, { passive: false });
+      });
+
+      document.querySelectorAll('.dropzone').forEach(zone => {
+        zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('highlight'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('highlight'));
+        zone.addEventListener('drop', onDrop);
+
+        zone.addEventListener('touchmove', touchMove, { passive: false });
+        zone.addEventListener('touchend', touchEnd, { passive: false });
+      });
+    }
+
+    function onDrop(e) {
+      e.preventDefault();
+      const zone = e.currentTarget;
+      const routeId = zone.dataset.route;
+      const animalId = e.dataTransfer.getData('text/plain');
+      handleDrop(animalId, routeId, zone);
+    }
+
+    // touch fallback
+    function touchStart(e) {
+      e.preventDefault();
+      draggingCard = e.currentTarget;
+      draggingCard.classList.add('dragging');
+    }
+    function touchMove(e) {
+      if (!draggingCard) return;
+      e.preventDefault();
+    }
+    function touchEnd(e) {
+      if (!draggingCard) return;
+      const touch = e.changedTouches[0];
+      const elem = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (elem && elem.classList && elem.classList.contains('dropzone')) {
+        handleDrop(draggingCard.dataset.animalId, elem.dataset.route, elem);
+      }
+      draggingCard.classList.remove('dragging');
+      draggingCard = null;
+    }
+
+    function handleDrop(animalId, routeId, zone) {
+      const animal = animals.find(a => a.id === animalId);
+      zone.classList.remove('highlight');
+      if (!animal) return;
+
+      if (animal.route === routeId) {
+        correctDrop(animal, zone);
+      } else {
+        wrongDrop(zone);
+      }
+    }
+
+    function correctDrop(animal, zone) {
+      zone.classList.add('correct');
+      playSound('correct');
+      const card = document.getElementById('card-' + animal.id);
+      if (card) card.remove();
+
+      // Create small animal icon in the drop zone
+      createAnimalIcon(animal, zone);
+
+      placed++;
+      savePlaced(animal.id);
+      updateScore();
+      showInfo(animal, zone);
+      if (placed === animals.length) {
+        endGame();
+      }
+    }
+
+    function createAnimalIcon(animal, zone) {
+      // Remove any existing icon in this zone
+      const existingIcon = zone.querySelector('.animal-icon');
+      if (existingIcon) existingIcon.remove();
+
+      // Create new small animal icon
+      const icon = document.createElement('div');
+      icon.className = 'animal-icon';
+      icon.innerHTML = `<img src="${animal.img}" alt="${animal.name}" title="${animal.name}">`;
+
+      // Position icon in center of drop zone
+      icon.style.position = 'absolute';
+      icon.style.top = '50%';
+      icon.style.left = '50%';
+      icon.style.transform = 'translate(-50%, -50%)';
+      icon.style.pointerEvents = 'none';
+      icon.style.zIndex = '10';
+
+      zone.appendChild(icon);
+    }
+
+    function wrongDrop(zone) {
+      mistakes++;
+      playSound('wrong');
+      zone.style.borderColor = 'var(--wrong)';
+      setTimeout(() => zone.style.borderColor = 'rgba(0,0,0,0)', 800);
+      saveMistakes();
+      updateStarsDisplay();
+    }
+
+    function updateScore() {
+      document.getElementById('scoreboard').textContent = `${placed} / ${animals.length}`;
+      updateStarsDisplay();
+    }
+    function calcStars() {
+      if (mistakes === 0) return 8;
+      if (mistakes <= 1) return 7;
+      if (mistakes <= 2) return 6;
+      if (mistakes <= 3) return 5;
+      if (mistakes <= 4) return 4;
+      if (mistakes <= 6) return 3;
+      if (mistakes <= 8) return 2;
+      return 1;
+    }
+    function updateStarsDisplay() {
+      // Show stars based on correct answers (placed), not mistakes
+      const earnedStars = Math.min(placed, 8); // Maximum 8 stars
+      document.getElementById('stars').textContent = '★'.repeat(earnedStars) + '☆'.repeat(8 - earnedStars);
+    }
+    function endGame() {
+      playSound('win');
+      document.getElementById('win-stars').textContent = '⭐⭐⭐';
+      document.getElementById('win-screen').style.display = 'flex';
+
+      // Start confetti animation
+      createConfetti();
+    }
+
+    function createConfetti() {
+      const confettiContainer = document.querySelector('.confetti-container');
+      confettiContainer.innerHTML = ''; // Clear existing confetti
+
+      // Create 50 confetti pieces
+      for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+
+        // Random horizontal position
+        confetti.style.left = Math.random() * 100 + '%';
+
+        // Random delay for staggered effect
+        confetti.style.animationDelay = Math.random() * 3 + 's';
+
+        // Random size variation
+        const size = Math.random() * 8 + 6; // 6-14px
+        confetti.style.width = size + 'px';
+        confetti.style.height = size + 'px';
+
+        // Random rotation speed
+        confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+
+        confettiContainer.appendChild(confetti);
+      }
+
+      // Clear confetti after animation
+      setTimeout(() => {
+        confettiContainer.innerHTML = '';
+      }, 5000);
+    }
+
+    let autoCloseTimer = null;
+
+    function showInfo(animal, zone) {
+      const dialog = document.getElementById('info-dialog');
+      document.getElementById('info-name').textContent = animal.name;
+      document.getElementById('info-text').innerHTML = `
+    <strong>Distance:</strong> ${animal.distance_km.toLocaleString()} km<br>
+    <strong>Time:</strong> ${animal.time_days}<br>
+    <strong>From:</strong> ${animal.from}<br>
+    <strong>To:</strong> ${animal.to}<br>
+    <strong>When:</strong> ${animal.months}<br>
+    <em>${animal.funfact}</em>
+  `;
+
+      // Position dialog near the drop zone but avoid overlapping the animal icon
+      if (zone) {
+        const rect = zone.getBoundingClientRect();
+        const mapRect = document.getElementById('map-area').getBoundingClientRect();
+
+        // Calculate position relative to map area
+        const leftPercent = ((rect.left - mapRect.left) / mapRect.width) * 100;
+        const topPercent = ((rect.top - mapRect.top) / mapRect.height) * 100;
+
+        // Smart positioning to avoid overlapping the animal icon
+        let dialogLeft, dialogTop;
+
+        // Try to position dialog to the right of the zone first
+        if (leftPercent < 50) {
+          dialogLeft = Math.min(leftPercent + 15, 65); // Position to the right
+        } else {
+          dialogLeft = Math.max(leftPercent - 35, 5); // Position to the left
+        }
+
+        // Try to position dialog below the zone first
+        if (topPercent < 40) {
+          dialogTop = Math.min(topPercent + 15, 50); // Position below
+        } else {
+          dialogTop = Math.max(topPercent - 25, 5); // Position above
+        }
+
+        dialog.style.position = 'fixed';
+        dialog.style.left = dialogLeft + '%';
+        dialog.style.top = dialogTop + '%';
+        dialog.style.transform = 'none';
+        dialog.style.margin = '0';
+        dialog.style.zIndex = '1001'; // Ensure dialog is above other elements
+      }
+
+      dialog.showModal();
+
+      // Clear any existing timer
+      if (autoCloseTimer) {
+        clearTimeout(autoCloseTimer);
+      }
+
+      // Set 15-second auto-close timer
+      autoCloseTimer = setTimeout(() => {
+        dialog.close();
+        autoCloseTimer = null;
+      }, 15000);
+    }
+
+    // storage
+    function savePlaced(id) {
+      const d = loadStorage();
+      if (!d.placed.includes(id)) d.placed.push(id);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+    }
+    function saveMistakes() {
+      const d = loadStorage();
+      d.mistakes = mistakes;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+    }
+    function isPlaced(id) {
+      return loadStorage().placed.includes(id);
+    }
+    function loadStorage() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { placed: [], mistakes: 0 }; }
+      catch (e) { return { placed: [], mistakes: 0 }; }
+    }
+    function restoreProgress() {
+      const d = loadStorage();
+      placed = d.placed.length;
+      mistakes = d.mistakes || 0;
+      document.querySelectorAll('.dropzone').forEach(z => {
+        const r = z.dataset.route;
+        const a = animals.find(an => an.route === r);
+        if (a && d.placed.includes(a.id)) z.classList.add('correct');
+      });
+    }
+    function clearStorage() { localStorage.removeItem(STORAGE_KEY); }
+
+    function startGame() {
+      const list = document.getElementById('animalList');
+      const cards = Array.from(list.children);
+      for (let i = cards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        list.appendChild(cards[j]);
+      }
+    }
+    function fullReset() {
+      placed = 0; mistakes = 0;
+      clearStorage();
+      renderAnimals();
+      setupDnD();
+      document.querySelectorAll('.dropzone').forEach(z => {
+        z.classList.remove('correct');
+        z.style.borderColor = 'rgba(0,0,0,0)';
+        // Remove animal icons from drop zones
+        const existingIcon = z.querySelector('.animal-icon');
+        if (existingIcon) existingIcon.remove();
+      });
+      updateScore();
+    }
+
+    // audio
+    let audioCtx = null;
+    function playSound(type) {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (type === 'win') {
+          const notes = [660, 880, 1046];
+          notes.forEach((f, i) => {
+            const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+            o.type = 'sine'; o.frequency.value = f;
+            o.connect(g); g.connect(audioCtx.destination);
+            g.gain.setValueAtTime(0.0001, audioCtx.currentTime + i * 0.18);
+            g.gain.exponentialRampToValueAtTime(0.3, audioCtx.currentTime + i * 0.18 + 0.05);
+            g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + i * 0.18 + 0.17);
+            o.start(audioCtx.currentTime + i * 0.18);
+            o.stop(audioCtx.currentTime + i * 0.18 + 0.2);
+          });
+          return;
+        }
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.connect(g); g.connect(audioCtx.destination);
+        let freq = 440, dur = .25;
+        if (type === 'correct') { freq = 880; dur = .22; }
+        if (type === 'wrong') { freq = 220; dur = .35; }
+        o.type = 'sine'; o.frequency.value = freq;
+        g.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.4, audioCtx.currentTime + .02);
+        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+        o.start(); o.stop(audioCtx.currentTime + dur + .05);
+      } catch (e) { }
+    }
+  </script>
+</body>
+
+</html>
